@@ -1,81 +1,159 @@
 #include "mystring.h"
-void my_puts(char * str) {
-    printf("%s",str);
-}
-unsigned long int my_strchr(char * str, const char digit) {
-    unsigned long int res = 0;
-    while(*str) {
-        if (*str == digit) {
-            return res;
-        }
-        res++;
+
+
+int my_puts(const char * str) {
+    while(*str){
+        if (putchar((int)*str) == EOF)
+            return EOF;
         str++;
     }
-    return 0;
+    return 1;
 }
-unsigned long int my_strlen(char * str) {
-    unsigned long int len = 0;
+
+
+char * my_strchr(char * str, int character) {
+    size_t res = 0;
+    while(*str) {
+        if (*str == character) {
+            return str;
+        }
+        str++;
+    }
+    return NULL;
+}
+
+
+size_t my_strlen(const char * str) {
+    size_t len = 0;
     while(*str) {
         len++;
         str++;
     }
     return len;
 }
-void my_strcpy(char * dest, char * source) {
+
+
+char * my_strcpy(char * dest, const char * source) {
+    if (dest == NULL || source == NULL)
+        return dest;
+    char * temp = dest;
     while(*source) {
-        *dest = *source;
-        dest++;
+        *temp = *source;
+        temp++;
         source++;
     }
-    *dest = '\0';
+    *temp = '\0';
+    return dest;
 }
-void my_strncpy(char * dest, char * source, size_t num){
-    while(*dest && num) {
+
+
+char * my_strncpy(char * dest, const char * source, size_t num){
+    if (dest == NULL || source == NULL)
+        return dest;
+    char * temp = dest;
+    while(*temp && num) {
         if (*source) {
-            *dest = *source;
+            *temp = *source;
             source++;
         }
         else
-            *dest = '\0';
-        dest++;
+            *temp = '\0';
+        temp++;
         num--;
     }
-    *dest = '\0';
+    return dest;
 }
-void my_strcat(char * dest, char * source) {
-    dest += my_strlen(dest);
+char * my_strcat(char * dest, const char * source) {
+    if (dest == NULL || source == NULL)
+        return dest;
+    char * temp = dest;
+    temp += my_strlen(dest);
     while(*source) {
-        *dest = *source;
-        dest++;
+        *temp = *source;
+        temp++;
         source++;
     }
-    *dest = '\0';
+    *temp = '\0';
+    return dest;
 }
-void my_strncat(char * dest, char * source, size_t num) {
-    dest += my_strlen(dest);
+char * my_strncat(char * dest, const char * source, size_t num) {
+    if (dest == NULL || source == NULL)
+        return dest;
+
+    char * temp = dest;
+
+    temp += my_strlen(dest);
     while(*source && num) {
-        *dest = *source;
-        dest++;
+        *temp = *source;
+        temp++;
         source++;
         num--;
     }
-    *dest = '\0';
+    *temp = '\0';
+    return dest;
 }
+
+
 char * my_fgets(char * str, size_t count, FILE* stream) {
+    if (str == NULL)
+        return NULL;
+
+    char * tempstr = str;
     char temp;
+
+    temp = (char)fgetc(stream);
+    if(temp == EOF)
+        return NULL;
+    *tempstr = temp;
+    tempstr++;
+    count--;
+    count -= 2;
     while(count) {
         temp = (char)fgetc(stream);
+
         if ( temp == EOF)
-            return NULL;
-        *str = temp;
-        str++;
+            return str;
+
+        if(temp == '\n') {
+            *tempstr = '\n';
+            return str;
+        }
+
+        *tempstr = temp;
+        tempstr++;
         count--;
     }
-    *str = '\0';
+    *tempstr = '\0';
     return str;
 }
-char * my_strdup(char * str1) {
+
+
+char * my_strdup(const char * str1) {
     char * newchar = (char*)malloc(my_strlen(str1)+1);
     my_strcpy(newchar,str1);
     return newchar;
+}
+
+ssize_t my_getline(char **lineptr, size_t *n, FILE *stream) {
+    ssize_t nn = 0;
+    char temp = (char)fgetc(stream);
+
+    if(*lineptr == NULL) {
+        *n = 100;
+        *lineptr = (char*)malloc(*n);
+    }
+    while(temp != '\n'){
+        if(temp == EOF)
+            return -1;
+        if(nn+1 == *n){
+            *n *= 2;
+            *lineptr = (char *)realloc(*lineptr,*n);
+            if(*lineptr == NULL)
+                return -1;
+        }
+        (*lineptr)[nn] = temp;
+        nn++;
+        temp = (char)fgetc(stream);
+    }
+    return nn;
 }
